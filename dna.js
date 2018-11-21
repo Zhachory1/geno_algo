@@ -1,13 +1,21 @@
 var mutation_rate = 0.1;
 
 function DNA(
-  size = random(5, 50),
+  size = random(10, 50),
   move = random(1, 10),
   dist = random(50, 500)
 ) {
   this.size = size;
   this.move = move;
   this.dist = dist;
+
+  this.equals = function(other) {
+    return (
+      this.size == other.size &&
+      this.move == other.mode &&
+      this.dist == other.dist
+    );
+  };
 }
 
 function combine(dna1, dna2) {

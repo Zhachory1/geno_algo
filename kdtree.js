@@ -13,68 +13,101 @@ var Node = function(point, split, value, left, right) {
     delete this.value;
     this.point = [];
     this.split = 0;
-    this.value = undefined
+    this.value = undefined;
     this.left = undefined;
     this.right = undefined;
-  }
+  };
 
-  this.setLeft = function(left) {
-    this.left = left;
-  }
-
-  this.setRight = function(right) {
-    this.right = right;
-  }
-
-  this.setAll = function(point, split, value) {
+  this.setAll = function(point, split, value, left, right) {
     this.point = point;
     this.split = split;
     this.value = value;
-  }
-}
+    this.left = left;
+    this.right = right;
+  };
+};
 
 var queryRange = function(min_point, max_point) {
   this.min = min_point; // bottom left corner of rectangle query
   this.max = max_point; // top right corner of rectangle query
-}
+};
 
-var KDTree = function(node, botleft, toprght) {
+var KDTree = function(node, botleft, toprght, func) {
   this.node = node;
   this.botleft = botleft;
   this.toprght = toprght;
-}
+  this.func = func;
+
+  this.insert = function(x) {
+    var insertImpl = function(new_x, curr_node, split) {
+      if (!curr_node) {
+        curr_node = new Node(
+          this.func(new_x),
+          split,
+          [new_x],
+          undefined,
+          undefined
+        );
+        return;
+      }
+      var x_point = this.func(new_x);
+      var dim = x_point.length;
+      if (x_point.equals(curr_node.point)) {
+        // Duplicate, add to values.
+        cure_node.push(new_x);
+      } else if (x_point[split] < curr_node.point[split]) {
+        curr_node.left = insertImpl(new_x, curr_node.left, (split + 1) % dim);
+      } else {
+        curr_node.right = insertImpl(new_x, curr_node.right, (split + 1) % dim);
+      }
+      return curr_node;
+    };
+    this.node = insertImpl(x, this.node, 0);
+  };
+};
 
 // Function to take a list of agents and return a KD-tree of them
-function kdFromAgents(agents, botleft, toprght) {
+function kdFromList(list, botleft, toprght, func) {
   // Create a recursive algorithm to put points in kdtree for me.
-  var makeKd = function(agent_set, split) {
+  // The func is a function that turns the value into an array that represents
+  // the location of the value.
+  var makeKd = function(sublist, split, func) {
     // Take the current sub set of agents and split
-    if (agent_set.length == 0) {
+    if (sublist.length == 0) {
       // Base case, stops the recursion
       return undefined;
     }
 
     // Else, sort the set by split dimension
-    var sorted = agent_set.sort(compareWithParam(split));
-    var m = sorted.length / 2; // Median index
+    var sorted = sublist.sort(compareWithParam(func, split));
+    var m = floor(sorted.length / 2); // Median index
     var d = sorted[m]; // Median value
-    var values = [d];
+    var values = [];
+    values.push(d);
     // gather all the same points with that value in this dimension
-    for ((m+1 < sorted.length) && (sorted[m+1].loc.array()[split] == d[split])) {
-      values.push(sorted[m+1])
+    var n = 0;
+    while (
+      m + n + 1 < sorted.length &&
+      func(sorted[m + n + 1])[split] == func(d)[split]
+    ) {
+      values.push(sorted[m + n + 1]);
       m++;
     }
-    var nextSplit = (split + 1) % d.length;
-    return new Node()
-  }
+    var nextSplit = (split + 1) % func(d).length;
+
+    return new Node(
+      func(d),
+      split,
+      d,
+      makeKd(sublist.slice(0, m), nextSplit, func),
+      makeKd(sublist.slice(m + n + 1, sublist.length), nextSplit, func)
+    );
+  };
+  return new KDTree(makeKd(list, 0, func), botleft, toprght, func);
 }
 
-function compareWithParam(split) {
+function compareWithParam(func, split) {
   return function(obj1, obj2) {
-    if (split == 0) {
-      return obj1.loc.x - obj2.loc.x;
-    } else {
-      return obj1.loc.y - obj2.loc.y;
-    }
-  }
+    return func(obj1)[split] - func(obj2)[split];
+  };
 }

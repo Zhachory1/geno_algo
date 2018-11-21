@@ -17,6 +17,10 @@ var neighbor_move_slider;
 // TODO: Make agent/food creation rate relative to number of agents in the
 //       environment.
 
+function getRate(x, base) {
+  return 5 / ((x + base) * (x + base));
+}
+
 function setup() {
   createCanvas(800, 800);
   for (var i = 0; i < pop_size; i++) {
@@ -24,8 +28,11 @@ function setup() {
   }
   red = color(255, 0, 0);
   green = color(0, 255, 0);
-  food_random_slider = createSlider(0, 0.2, 0.1, 0.002);
-  neighbor_move_slider = createSlider(0, 0.5, 0.2, 0.005);
+  createP("Food base");
+  food_random_slider = createSlider(0, 10, 1, 1);
+  createP("Neighbor base");
+  neighbor_move_slider = createSlider(0, 10, 2, 1);
+  createP("Options");
   debug_button = createButton("Debug");
   is_step_button = createButton("Pause");
   debug_button.mousePressed(toggleDebug);
@@ -42,8 +49,9 @@ function toggleIsStep() {
 
 function draw() {
   background(50);
-  var neighbor_move_rate = neighbor_move_slider.value();
-  var food_random_rate = food_random_slider.value();
+  // This getRate makes the rate relative to the size of the current population.
+  var neighbor_move_rate = getRate(agents.length, neighbor_move_slider.value());
+  var food_random_rate = getRate(agents.length, food_random_slider.value());
 
   // Let's add some food and agents randomly in the environment
   if (is_step && random() < food_random_rate) {

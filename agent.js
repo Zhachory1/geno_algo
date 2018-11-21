@@ -1,15 +1,17 @@
 var healing_rate = 20;
 var poison_rate = 10;
-var hurt_rate = 0.1;
-var reproduce_thres = 300;
+var hurt_rate = 0.2;
+var reproduce_thres = 1000;
 
 function Agent(x, y, dna) {
   this.loc = createVector(x, y);
   this.health = 100;
   this.velocity = createVector();
   this.acceleration = createVector();
-  this.max_velocity = 10;
   this.dna = dna;
+  // Make max_velocity relative to size
+  // Size is from 10 -> 50. Want speed to be from 5 -> 10;
+  this.max_velocity = (this.dna.size - 10) / 8 + 5;
   this.life = 0;
   this.ready_to_reproduce = false;
 
@@ -78,5 +80,9 @@ function Agent(x, y, dna) {
     stroke(255);
     ellipse(0, 0, this.dna.dist, this.dna.dist);
     pop();
+  };
+
+  this.equals = function(other) {
+    return this.dna == other.dna;
   };
 }
