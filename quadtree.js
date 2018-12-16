@@ -173,7 +173,7 @@ var QuadTree = function(points, max_p, bl, tr) {
       // If leaf, find `points within range
       for (p of node.points) {
         if (this._inRange(p, p, bl, tr)) {
-          result.push(p);
+          results.push(p);
         }
       }
     } else {

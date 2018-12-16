@@ -1,5 +1,5 @@
 var points;
-var num_of_points = 1000;
+var num_of_points = 500;
 var kd;
 var quad;
 
@@ -32,13 +32,24 @@ function draw() {
   // print point
   fill(255, 255, 255);
   for (point of points) {
-    ellipse(point.x, point.y, 8);
+    ellipse(point.x, point.y, 6);
   }
   rectMode(CORNERS);
   noFill();
   stroke(255, 255, 255, 100);
   printQuad(quad.root);
 
+  var bl = createVector(random(0, width), random(0, height));
+  var tr = createVector(random(bl.x, width), random(0, bl.y));
+
+  stroke(0, 255, 100, 200);
+  rect(bl.x, bl.y, tr.x, tr.y);
+
+  fill(0, 255, 100);
+  found = quad.queryRange(bl, tr);
+  for (point of found) {
+    ellipse(point.x, point.y, 8);
+  }
   // printKD(
   //   kd.node,
   //   kd.botleft.array().slice(0, 2),
@@ -102,7 +113,6 @@ function printKD(node, min, max, split) {
 }
 
 function printQuad(node) {
-  console.log(node.bl.x, node.bl.y, node.tr.x, node.tr.y);
   rect(node.bl.x, node.bl.y, node.tr.x, node.tr.y);
   if (node.split) {
     for (sect of [node.nw, node.sw, node.ne, node.se]) {
