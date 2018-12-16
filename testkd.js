@@ -27,12 +27,12 @@ function draw() {
   for (point of points) {
     ellipse(point.x, point.y, 8);
   }
-  printKD(
-    kd.node,
-    kd.botleft.array().slice(0, 2),
-    kd.toprght.array().slice(0, 2),
-    0
-  );
+  // printKD(
+  //   kd.node,
+  //   kd.botleft.array().slice(0, 2),
+  //   kd.toprght.array().slice(0, 2),
+  //   0
+  // );
   noLoop();
 }
 
