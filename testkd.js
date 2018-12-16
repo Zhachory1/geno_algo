@@ -1,9 +1,10 @@
 var points;
-var num_of_points = 30;
+var num_of_points = 1000;
 var kd;
+var quad;
 
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(1000, 1000);
   points = [];
   for (var i = 0; i < num_of_points; i++) {
     points.push(createVector(randFloor(width), randFloor(height)));
@@ -18,6 +19,12 @@ function setup() {
       return [aray[0], aray[1]];
     }
   );
+  quad = new QuadTree(
+    points,
+    1,
+    createVector(0, height),
+    createVector(width, 0)
+  );
 }
 
 function draw() {
@@ -27,6 +34,11 @@ function draw() {
   for (point of points) {
     ellipse(point.x, point.y, 8);
   }
+  rectMode(CORNERS);
+  noFill();
+  stroke(255, 255, 255, 100);
+  printQuad(quad.root);
+
   // printKD(
   //   kd.node,
   //   kd.botleft.array().slice(0, 2),
@@ -40,8 +52,6 @@ function draw() {
 function printKD(node, min, max, split) {
   var mid = node.point;
   var next_split = (split + 1) % 2;
-  stroke(255, 255, 255, 100);
-  console.log(min, mid, max);
   if (split == 0) {
     // Vertical lines, left/right
     line(mid[split], min[next_split], mid[split], max[next_split]);
@@ -87,6 +97,16 @@ function printKD(node, min, max, split) {
           .slice(0, 2),
         next_split
       );
+    }
+  }
+}
+
+function printQuad(node) {
+  console.log(node.bl.x, node.bl.y, node.tr.x, node.tr.y);
+  rect(node.bl.x, node.bl.y, node.tr.x, node.tr.y);
+  if (node.split) {
+    for (sect of [node.nw, node.sw, node.ne, node.se]) {
+      printQuad(sect);
     }
   }
 }

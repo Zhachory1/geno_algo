@@ -27,5 +27,14 @@ Array.prototype.equals = function(array) {
 Object.defineProperty(Array.prototype, "equals", { enumerable: false });
 
 function randFloor(x) {
-  return floor(random() * x);
+  // Gaussion between 0 and 1
+  var randG = min(1, max(0, randomGaussian(0.5, 0.2)));
+  return randG * x;
 }
+
+Array.prototype.extend = function(other_array) {
+  /* You should include a test to check whether other_array really is an array */
+  other_array.forEach(function(v) {
+    this.push(v);
+  }, this);
+};
