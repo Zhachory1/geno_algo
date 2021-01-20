@@ -7,51 +7,45 @@ var is_step = true;
 
 var red;
 var green;
-var debug_button;
-var is_step_button;
-var food_random_slider;
-var neighbor_move_slider;
+var gui;
+var options = {
+  food_spawn: 2,
+  neighbor_flee: 1,
+  debug: true,
+  pause: false
+
+};
 
 // TODO: Make a kdtree implementation.
-
-// TODO: Make agent/food creation rate relative to number of agents in the
-//       environment.
 
 function getRate(x, base) {
   return 5 / ((x + base) * (x + base));
 }
 
 function setup() {
-  createCanvas(800, 800);
+  createCanvas(windowWidth, windowHeight);
+  frameRate(30);
   for (var i = 0; i < pop_size; i++) {
     agents.push(new Agent(random() * width, random() * height, new DNA()));
   }
   red = color(255, 0, 0);
   green = color(0, 255, 0);
-  createP("Food base");
-  food_random_slider = createSlider(0, 10, 1, 1);
-  createP("Neighbor base");
-  neighbor_move_slider = createSlider(0, 10, 2, 1);
-  createP("Options");
-  debug_button = createButton("Debug");
-  is_step_button = createButton("Pause");
-  debug_button.mousePressed(toggleDebug);
-  is_step_button.mousePressed(toggleIsStep);
+  gui = new dat.GUI({name: "Population Options"});
+  gui.add(options, "food_spawn", 0, 10, 1);
+  gui.add(options, "neighbor_flee", 0, 10, 1);
+  gui.add(options, "debug");
+  gui.add(options, "pause");
 }
 
-function toggleDebug() {
-  debug = !debug;
-}
-
-function toggleIsStep() {
-  is_step = !is_step;
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
   background(50);
   // This getRate makes the rate relative to the size of the current population.
-  var neighbor_move_rate = getRate(agents.length, neighbor_move_slider.value());
-  var food_random_rate = getRate(agents.length, food_random_slider.value());
+  var neighbor_move_rate = getRate(agents.length, options.neighbor_flee);
+  var food_random_rate = getRate(agents.length, options.food_spawn);
 
   // Let's add some food and agents randomly in the environment
   if (is_step && random() < food_random_rate) {
@@ -109,7 +103,7 @@ function draw() {
     agents[i].applyForce(friction.mult(normal_force));
 
     // Let agent take a step
-    if (is_step) {
+    if (!options.pause) {
       agents[i].step();
     }
 
@@ -128,7 +122,7 @@ function draw() {
   for (var i = agents.length - 1; i >= 0; i--) {
     // Remove if no health and draw agents.
     agents[i].draw(red, green);
-    if (debug) {
+    if (options.debug) {
       agents[i].drawDebug();
     }
   }
@@ -140,6 +134,7 @@ function mousePressed() {
 
 function keyPressed() {
   if (keyCode == ENTER) {
-    is_step = !is_step;
+    options.pause = !options.pause;
+    Controller.updateDisplay()
   }
 }

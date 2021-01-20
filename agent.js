@@ -39,7 +39,7 @@ function Agent(x, y, dna) {
     }
     this.loc = new_loc;
 
-    if (!this.ready_to_reproduce && this.life == reproduce_thres) {
+    if (!this.ready_to_reproduce && this.life >= reproduce_thres) {
       this.ready_to_reproduce = true;
     }
 
