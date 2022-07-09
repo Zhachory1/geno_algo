@@ -1,4 +1,4 @@
-var Node = function(point, split, value, left, right) {
+const Node = function(point, split, value, left, right) {
   this.point = point; // k-dim list to define the location of the point.
   this.split = split; // current dim splitting data by. 0 <= split < k
   // Actual object(s) associated with the point. This could be a list as
@@ -27,12 +27,12 @@ var Node = function(point, split, value, left, right) {
   };
 };
 
-var queryRange = function(min_point, max_point) {
+const queryRange = function(min_point, max_point) {
   this.min = min_point; // bottom left corner of rectangle query
   this.max = max_point; // top right corner of rectangle query
 };
 
-var KDTree = function(node, botleft, toprght, func) {
+const KDTree = function(node, botleft, toprght, func) {
   this.node = node;
   this.botleft = botleft;
   this.toprght = toprght;
@@ -42,16 +42,16 @@ var KDTree = function(node, botleft, toprght, func) {
     var insertImpl = function(new_x, curr_node, split) {
       if (!curr_node) {
         curr_node = new Node(
-          this.func(new_x),
-          split,
-          [new_x],
-          undefined,
-          undefined
+            this.func(new_x),
+            split,
+            [new_x],
+            undefined,
+            undefined,
         );
         return;
       }
-      var x_point = this.func(new_x);
-      var dim = x_point.length;
+      const x_point = this.func(new_x);
+      const dim = x_point.length;
       if (x_point.equals(curr_node.point)) {
         // Duplicate, add to values.
         cure_node.push(new_x);
@@ -79,13 +79,13 @@ function kdFromList(list, botleft, toprght, func) {
     }
 
     // Else, sort the set by split dimension
-    var sorted = sublist.sort(compareWithParam(func, split));
-    var m = floor(sorted.length / 2); // Median index
-    var d = sorted[m]; // Median value
-    var values = [];
+    const sorted = sublist.sort(compareWithParam(func, split));
+    let m = floor(sorted.length / 2); // Median index
+    const d = sorted[m]; // Median value
+    const values = [];
     values.push(d);
     // gather all the same points with that value in this dimension
-    var n = 0;
+    const n = 0;
     while (
       m + n + 1 < sorted.length &&
       func(sorted[m + n + 1])[split] == func(d)[split]
@@ -93,14 +93,14 @@ function kdFromList(list, botleft, toprght, func) {
       values.push(sorted[m + n + 1]);
       m++;
     }
-    var nextSplit = (split + 1) % func(d).length;
+    const nextSplit = (split + 1) % func(d).length;
 
     return new Node(
-      func(d),
-      split,
-      d,
-      makeKd(sublist.slice(0, m), nextSplit, func),
-      makeKd(sublist.slice(m + n + 1, sublist.length), nextSplit, func)
+        func(d),
+        split,
+        d,
+        makeKd(sublist.slice(0, m), nextSplit, func),
+        makeKd(sublist.slice(m + n + 1, sublist.length), nextSplit, func),
     );
   };
   return new KDTree(makeKd(list, 0, func), botleft, toprght, func);

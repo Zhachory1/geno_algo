@@ -1,4 +1,4 @@
-var Node = function(points, bl, tr, sw, nw, se, ne, split) {
+const Node = function(points, bl, tr, sw, nw, se, ne, split) {
   this.points = points; // List[p5.Vector]; filled with points in region
   this.bl = bl; // p5.Vector; Bottom left point of the range
   this.tr = tr; // p5.Vector; Top right point of the range
@@ -9,19 +9,19 @@ var Node = function(points, bl, tr, sw, nw, se, ne, split) {
   this.split = split; // Boolean; Whether this is a branching or a leaf node
 };
 
-var QuadTree = function(points, max_p, bl, tr) {
+const QuadTree = function(points, max_p, bl, tr) {
   this.max_p = max_p;
   this.bl = bl;
   this.tr = tr;
   this.depth = 0;
 
   this._divide = function(points, bl, tr) {
-    var sw = [];
-    var nw = [];
-    var se = [];
-    var ne = [];
-    var mid_x = (tr.x + bl.x) / 2;
-    var mid_y = (tr.y + bl.y) / 2;
+    const sw = [];
+    const nw = [];
+    const se = [];
+    const ne = [];
+    const mid_x = (tr.x + bl.x) / 2;
+    const mid_y = (tr.y + bl.y) / 2;
     for (p of points) {
       if (p.x < mid_x) {
         if (p.y < mid_y) {
@@ -37,7 +37,7 @@ var QuadTree = function(points, max_p, bl, tr) {
         }
       }
     }
-    return { sw: sw, nw: nw, se: se, ne: ne };
+    return {sw: sw, nw: nw, se: se, ne: ne};
   };
 
   this._build = function(points, bl, tr, depth) {
@@ -47,30 +47,30 @@ var QuadTree = function(points, max_p, bl, tr) {
     }
     this.depth = max(depth, this.depth);
     // Split points in 4 sub regions
-    var new_nodes = this._divide(points, bl, tr);
-    var sw = new_nodes.sw;
-    var nw = new_nodes.nw;
-    var se = new_nodes.se;
-    var ne = new_nodes.ne;
-    var mid_x = (tr.x + bl.x) / 2;
-    var mid_y = (tr.y + bl.y) / 2;
-    var nd = depth + 1;
+    const new_nodes = this._divide(points, bl, tr);
+    const sw = new_nodes.sw;
+    const nw = new_nodes.nw;
+    const se = new_nodes.se;
+    const ne = new_nodes.ne;
+    const mid_x = (tr.x + bl.x) / 2;
+    const mid_y = (tr.y + bl.y) / 2;
+    const nd = depth + 1;
     return new Node(
-      [],
-      bl,
-      tr,
-      this._build(sw, bl, createVector(mid_x, mid_y), nd),
-      this._build(nw, createVector(bl.x, mid_y), createVector(mid_x, tr.y), nd),
-      this._build(se, createVector(mid_x, bl.y), createVector(tr.x, mid_y), nd),
-      this._build(ne, createVector(mid_x, mid_y), tr, nd),
-      true
+        [],
+        bl,
+        tr,
+        this._build(sw, bl, createVector(mid_x, mid_y), nd),
+        this._build(nw, createVector(bl.x, mid_y), createVector(mid_x, tr.y), nd),
+        this._build(se, createVector(mid_x, bl.y), createVector(tr.x, mid_y), nd),
+        this._build(ne, createVector(mid_x, mid_y), tr, nd),
+        true,
     );
   };
   this.root = this._build(points, bl, tr, 0);
 
   this.insert = function(new_point) {
-    var temp_node = this.root;
-    var depth = 0;
+    let temp_node = this.root;
+    let depth = 0;
     while (temp_node.split == true) {
       depth += 1;
       // Is not a leaf, keep traversing
@@ -99,8 +99,8 @@ var QuadTree = function(points, max_p, bl, tr) {
   };
 
   this.query = function(needle) {
-    var temp_node = this.root;
-    var depth = 0;
+    let temp_node = this.root;
+    let depth = 0;
     while (temp_node.split == true) {
       depth += 1;
       // Is not a leaf, keep traversing
@@ -133,7 +133,7 @@ var QuadTree = function(points, max_p, bl, tr) {
       return node.points;
     }
     // Not leaf, continue recursion down
-    var results = [];
+    const results = [];
     for (sect of [node.nw, node.sw, node.ne, node.se]) {
       results.extend(this._gatherPoints(sect));
     }
@@ -168,7 +168,7 @@ var QuadTree = function(points, max_p, bl, tr) {
       return this._gatherPoints(node);
     }
     // We know that it overlaps, but it doesn't entirely cover to node.`
-    var results = [];
+    const results = [];
     if (!node.split) {
       // If leaf, find `points within range
       for (p of node.points) {

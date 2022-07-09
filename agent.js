@@ -1,7 +1,17 @@
-var healing_rate = 20;
-var poison_rate = 10;
-var hurt_rate = 0.2;
-var reproduce_thres = 1000;
+let agentOptions = { 
+  healing_rate: 20,
+  poison_rate: 10,
+  hurt_rate: 0.2,
+  reproduce_thres: 500
+}
+
+function setUpAgentOptions(gui) {
+  let agent_options = gui.addFolder("Agent Options")
+  agent_options.add(agentOptions, "healing_rate", 0, 20, 0.5)
+  agent_options.add(agentOptions, "poison_rate", 0, 20, 0.5)
+  agent_options.add(agentOptions, "hurt_rate", 0, 1, 0.1)
+  agent_options.add(agentOptions, "reproduce_thres")
+}
 
 function Agent(x, y, dna) {
   this.loc = createVector(x, y);
@@ -28,33 +38,33 @@ function Agent(x, y, dna) {
     // Move agent
     var new_loc = p5.Vector.add(this.loc, this.velocity);
     if (new_loc.x > width) {
-      new_loc.x = 0;
+      new_loc.x = new_loc.x - width;
     } else if (new_loc.x < 0) {
-      new_loc.x = width;
+      new_loc.x = new_loc.x + width;
     }
     if (new_loc.y > height) {
-      new_loc.y = 0;
+      new_loc.y = new_loc.y - height;
     } else if (new_loc.y < 0) {
-      new_loc.y = height;
+      new_loc.y = new_loc.y + height;
     }
     this.loc = new_loc;
 
-    if (!this.ready_to_reproduce && this.life >= reproduce_thres) {
+    if (!this.ready_to_reproduce && this.life >= agentOptions.reproduce_thres) {
       this.ready_to_reproduce = true;
     }
 
     // Take away health
-    this.health -= hurt_rate;
+    this.health -= agentOptions.hurt_rate;
   };
 
   this.reproduce = function() {
     this.ready_to_reproduce = false;
     this.life = 0;
-    this.health -= poison_rate;
+    this.health -= agentOptions.poison_rate;
   };
 
   this.heal = function() {
-    this.health += healing_rate;
+    this.health += agentOptions.healing_rate;
   };
 
   // TODO: Draw agent as a fish

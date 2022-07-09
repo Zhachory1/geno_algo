@@ -1,29 +1,29 @@
-var points;
-var num_of_points = 500;
-var kd;
-var quad;
+let points;
+const num_of_points = 500;
+let kd;
+let quad;
 
 function setup() {
   createCanvas(1000, 1000);
   points = [];
-  for (var i = 0; i < num_of_points; i++) {
+  for (let i = 0; i < num_of_points; i++) {
     points.push(createVector(randFloor(width), randFloor(height)));
   }
   // points = [createVector(50, 80), createVector(25, 60), createVector(75, 20)];
   kd = kdFromList(
-    points,
-    createVector(0, height),
-    createVector(width, 0),
-    function(obj) {
-      var aray = obj.array();
-      return [aray[0], aray[1]];
-    }
+      points,
+      createVector(0, height),
+      createVector(width, 0),
+      function(obj) {
+        const aray = obj.array();
+        return [aray[0], aray[1]];
+      },
   );
   quad = new QuadTree(
-    points,
-    1,
-    createVector(0, height),
-    createVector(width, 0)
+      points,
+      1,
+      createVector(0, height),
+      createVector(width, 0),
   );
 }
 
@@ -39,8 +39,8 @@ function draw() {
   stroke(255, 255, 255, 100);
   printQuad(quad.root);
 
-  var bl = createVector(random(0, width), random(0, height));
-  var tr = createVector(random(bl.x, width), random(0, bl.y));
+  const bl = createVector(random(0, width), random(0, height));
+  const tr = createVector(random(bl.x, width), random(0, bl.y));
 
   stroke(0, 255, 100, 200);
   rect(bl.x, bl.y, tr.x, tr.y);
@@ -61,52 +61,52 @@ function draw() {
 
 // Assuming this is a 2d environment
 function printKD(node, min, max, split) {
-  var mid = node.point;
-  var next_split = (split + 1) % 2;
+  const mid = node.point;
+  const next_split = (split + 1) % 2;
   if (split == 0) {
     // Vertical lines, left/right
     line(mid[split], min[next_split], mid[split], max[next_split]);
     if (node.left !== undefined) {
       printKD(
-        node.left,
-        min,
-        createVector(mid[split], max[next_split])
-          .array()
-          .slice(0, 2),
-        next_split
+          node.left,
+          min,
+          createVector(mid[split], max[next_split])
+              .array()
+              .slice(0, 2),
+          next_split,
       );
     }
     if (node.right !== undefined) {
       printKD(
-        node.right,
-        createVector(mid[split], min[next_split])
-          .array()
-          .slice(0, 2),
-        max,
-        next_split
+          node.right,
+          createVector(mid[split], min[next_split])
+              .array()
+              .slice(0, 2),
+          max,
+          next_split,
       );
     }
   } else {
-    //Horizontal lines, top and bottom
+    // Horizontal lines, top and bottom
     line(min[next_split], mid[split], max[next_split], mid[split]);
     if (node.left !== undefined) {
       printKD(
-        node.left,
-        createVector(min[next_split], mid[split])
-          .array()
-          .slice(0, 2),
-        max,
-        next_split
+          node.left,
+          createVector(min[next_split], mid[split])
+              .array()
+              .slice(0, 2),
+          max,
+          next_split,
       );
     }
     if (node.right !== undefined) {
       printKD(
-        node.right,
-        min,
-        createVector(max[next_split], mid[split])
-          .array()
-          .slice(0, 2),
-        next_split
+          node.right,
+          min,
+          createVector(max[next_split], mid[split])
+              .array()
+              .slice(0, 2),
+          next_split,
       );
     }
   }
