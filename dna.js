@@ -5,18 +5,21 @@ function DNA(
     move = random(1, 100),
     dist = random(50, 500),
     foodAttraction = random(0.5, 1.5),
+    reproduceAge = random(200, 800),
 ) {
   this.size = size;
   this.move = move;
   this.dist = dist;
   this.foodAttraction = foodAttraction;
+  this.reproduceAge = reproduceAge;
 
   this.equals = function(other) {
     return (
       this.size == other.size &&
       this.move == other.move &&
       this.dist == other.dist &&
-      this.foodAttraction == other.foodAttraction
+      this.foodAttraction == other.foodAttraction &&
+      this.reproduceAge == other.reproduceAge
     );
   };
 }
@@ -26,6 +29,7 @@ function combine(dna1, dna2) {
   let newMove = 0;
   let newDist = 0;
   let newFoodAttraction = 0;
+  let newReproduceAge = 0;
 
   // size combine or mutate
   if (random() < mutation_rate) {
@@ -59,5 +63,19 @@ function combine(dna1, dna2) {
     newFoodAttraction = (dna1.foodAttraction + dna2.foodAttraction) / 2;
   }
 
-  return new DNA(newSize, newMove, newDist, newFoodAttraction);
+  // reproduce age combine or mutate
+  if (random() < mutation_rate) {
+    newReproduceAge = random(200, 800);
+  } else {
+    // average 1 and 2
+    newReproduceAge = (dna1.reproduceAge + dna2.reproduceAge) / 2;
+  }
+
+  return new DNA(
+      newSize,
+      newMove,
+      newDist,
+      newFoodAttraction,
+      newReproduceAge,
+  );
 }
