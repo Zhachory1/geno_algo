@@ -156,7 +156,5 @@ function mousePressed() {
 function keyPressed() {
   if (keyCode == ENTER) {
     options.pause = !options.pause;
-    console.log("No loop");
-    noLoop();
   }
 }
