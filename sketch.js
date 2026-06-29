@@ -60,9 +60,36 @@ function todoidalDist(locA, locB) {
   return sqrt(dx*dx + dy*dy)
 }
 
-function crossesEdge(loc, radius) {
-  return loc.x - radius < 0 || loc.x + radius > width ||
-    loc.y - radius < 0 || loc.y + radius > height;
+function axisRanges(center, radius, maxValue) {
+  if (radius * 2 >= maxValue) return [[0, maxValue]];
+
+  const minValue = center - radius;
+  const maxRangeValue = center + radius;
+  if (minValue < 0) return [[0, maxRangeValue], [maxValue + minValue, maxValue]];
+  if (maxRangeValue > maxValue) return [[minValue, maxValue], [0, maxRangeValue - maxValue]];
+  return [[minValue, maxRangeValue]];
+}
+
+function queryWrapped(tree, loc, radius) {
+  const results = [];
+  const seen = new Set();
+  const xRanges = axisRanges(loc.x, radius, width);
+  const yRanges = axisRanges(loc.y, radius, height);
+
+  for (let xRange of xRanges) {
+    for (let yRange of yRanges) {
+      for (let value of tree.queryRange(
+          [xRange[0], yRange[0]],
+          [xRange[1], yRange[1]],
+      )) {
+        if (!seen.has(value)) {
+          seen.add(value);
+          results.push(value);
+        }
+      }
+    }
+  }
+  return results;
 }
 
 /* eslint-disable-next-line no-unused-vars */
@@ -82,46 +109,51 @@ function draw() {
     food.x,
     food.y,
   ]);
+  const agentTree = kdFromList(agents, [0, 0], [width, height], (agent) => [
+    agent.loc.x,
+    agent.loc.y,
+  ]);
+  const maxAgentDist = agents.reduce(
+      (largest, agent) => max(largest, agent.dna.dist),
+      0,
+  );
 
   for (let i = agents.length - 1; i >= 0; i--) {
     // Add neighbors steering behavior
-    for (let j = agents.length - 1; j >= 0; j--) {
-      if (j != i) {
-        let dist = todoidalDist(agents[i].loc, agents[j].loc)
+    const agentRadius = max(agents[i].dna.dist, maxAgentDist);
+    const candidateAgents = queryWrapped(agentTree, agents[i].loc, agentRadius);
+    for (let j = candidateAgents.length - 1; j >= 0; j--) {
+      const other = candidateAgents[j];
+      if (agents.indexOf(other) == -1 || other == agents[i]) continue;
 
-        if (agents[i].ready_to_reproduce && 
-            agents[j].ready_to_reproduce && 
-            (dist < max(agents[i].dna.dist, agents[j].dna.dist))) {
-          agents[i].reproduce();
-          agents[j].reproduce();
-          let newDNA = combine(agents[i].dna, agents[j].dna);
-          agents.push(new Agent(agents[i].loc.x, agents[i].loc.y, newDNA));
-          reproduced++
-        }
-        if (dist < agents[i].dna.dist) {
-          let direction = p5.Vector.sub(agents[j].loc, agents[i].loc).normalize();
-          // If the other is bigger than you, run away
-          let away = 2 * log(agents[i].dna.size / agents[j].dna.size);
-          let newForce = p5.Vector.mult(
-            direction,
-            away * agents[i].dna.move * neighborMoveRate
-          );
-          agents[i].applyForce(newForce);
-        }
+      let dist = todoidalDist(agents[i].loc, other.loc)
+
+      if (agents[i].ready_to_reproduce &&
+          other.ready_to_reproduce &&
+          (dist < max(agents[i].dna.dist, other.dna.dist))) {
+        agents[i].reproduce();
+        other.reproduce();
+        let newDNA = combine(agents[i].dna, other.dna);
+        agents.push(new Agent(agents[i].loc.x, agents[i].loc.y, newDNA));
+        reproduced++
+      }
+      if (dist < agents[i].dna.dist) {
+        let direction = p5.Vector.sub(other.loc, agents[i].loc).normalize();
+        // If the other is bigger than you, run away
+        let away = 2 * log(agents[i].dna.size / other.dna.size);
+        let newForce = p5.Vector.mult(
+          direction,
+          away * agents[i].dna.move * neighborMoveRate
+        );
+        agents[i].applyForce(newForce);
       }
     }
 
     let averageDir = createVector()
-    const scanAllFood = crossesEdge(agents[i].loc, agents[i].dna.dist);
-    const candidateFoods = scanAllFood ? foods : foodTree.queryRange(
-        [agents[i].loc.x - agents[i].dna.dist,
-          agents[i].loc.y - agents[i].dna.dist],
-        [agents[i].loc.x + agents[i].dna.dist,
-          agents[i].loc.y + agents[i].dna.dist],
-    );
+    const candidateFoods = queryWrapped(foodTree, agents[i].loc, agents[i].dna.dist);
     for (let j = candidateFoods.length - 1; j >= 0; j--) {
       const food = candidateFoods[j];
-      const foodIndex = scanAllFood ? j : foods.indexOf(food);
+      const foodIndex = foods.indexOf(food);
       if (foodIndex == -1) continue;
 
       let dist = todoidalDist(agents[i].loc, food)
