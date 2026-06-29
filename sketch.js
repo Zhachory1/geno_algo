@@ -109,7 +109,9 @@ function drawHud() {
   );
   const bestDNA = best ?
     `size ${best.dna.size.toFixed(1)}, move ${best.dna.move.toFixed(1)}, ` +
-      `dist ${best.dna.dist.toFixed(1)}, food ${best.dna.foodAttraction.toFixed(1)}` :
+      `dist ${best.dna.dist.toFixed(1)}, ` +
+      `food ${best.dna.foodAttraction.toFixed(1)}, ` +
+      `age ${best.dna.reproduceAge.toFixed(0)}` :
     'none';
 
   fill(255);
