@@ -60,6 +60,11 @@ function todoidalDist(locA, locB) {
   return sqrt(dx*dx + dy*dy)
 }
 
+function crossesEdge(loc, radius) {
+  return loc.x - radius < 0 || loc.x + radius > width ||
+    loc.y - radius < 0 || loc.y + radius > height;
+}
+
 /* eslint-disable-next-line no-unused-vars */
 function draw() {
   background(50);
@@ -72,6 +77,11 @@ function draw() {
     let newFood = createVector(random() * width, random() * height);
     foods.push(newFood);
   }
+
+  const foodTree = kdFromList(foods, [0, 0], [width, height], (food) => [
+    food.x,
+    food.y,
+  ]);
 
   for (let i = agents.length - 1; i >= 0; i--) {
     // Add neighbors steering behavior
@@ -102,13 +112,24 @@ function draw() {
     }
 
     let averageDir = createVector()
-    for (let j = foods.length - 1; j >= 0; j--) {
-      let dist = todoidalDist(agents[i].loc, foods[j])
+    const scanAllFood = crossesEdge(agents[i].loc, agents[i].dna.dist);
+    const candidateFoods = scanAllFood ? foods : foodTree.queryRange(
+        [agents[i].loc.x - agents[i].dna.dist,
+          agents[i].loc.y - agents[i].dna.dist],
+        [agents[i].loc.x + agents[i].dna.dist,
+          agents[i].loc.y + agents[i].dna.dist],
+    );
+    for (let j = candidateFoods.length - 1; j >= 0; j--) {
+      const food = candidateFoods[j];
+      const foodIndex = scanAllFood ? j : foods.indexOf(food);
+      if (foodIndex == -1) continue;
+
+      let dist = todoidalDist(agents[i].loc, food)
       if (dist < agents[i].dna.size) {
-        foods.splice(j, 1);
+        foods.splice(foodIndex, 1);
         agents[i].heal();
       } else if (dist < agents[i].dna.dist) {
-        averageDir.add(new p5.Vector.sub(foods[j], agents[i].loc))
+        averageDir.add(new p5.Vector.sub(food, agents[i].loc))
         // break;
       }
     }
