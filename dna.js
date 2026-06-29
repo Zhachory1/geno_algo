@@ -12,16 +12,16 @@ function DNA(
   this.equals = function(other) {
     return (
       this.size == other.size &&
-      this.move == other.mode &&
+      this.move == other.move &&
       this.dist == other.dist
     );
   };
 }
 
 function combine(dna1, dna2) {
-  newSize = 0;
-  newMove = 0;
-  newDist = 0;
+  let newSize = 0;
+  let newMove = 0;
+  let newDist = 0;
 
   // size combine or mutate
   if (random() < mutation_rate) {
@@ -33,7 +33,7 @@ function combine(dna1, dna2) {
 
   // move combine or mutate
   if (random() < mutation_rate) {
-    newMove = random(1, 10);
+    newMove = random(1, 100);
   } else {
     // average 1 and 2
     newMove = (dna1.move + dna2.move) / 2;
