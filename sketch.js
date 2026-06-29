@@ -10,7 +10,8 @@ let options = {
   foodSpawn: 4,
   neighborFlee: 3,
   debug: true,
-  pause: false
+  pause: false,
+  resetPopulation: resetPopulation
 };
 
 // TODO: Make a kdtree implementation.
@@ -25,12 +26,13 @@ function setUpPopOptions(gui) {
   popOptions.add(options, "neighborFlee", 0, 10, 0.5);
   popOptions.add(options, "debug");
   popOptions.add(options, "pause");
+  popOptions.add(options, "resetPopulation");
 }
 
-/* eslint-disable-next-line no-unused-vars */
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  frameRate(30);
+function resetPopulation() {
+  agents = [];
+  foods = [];
+  reproduced = 0;
   for (let i = 0; i < 20; i++) {
     agents.push(new Agent(random() * width, random() * height, new DNA()));
     for (let j = 0; j < 3; j++) {
@@ -38,6 +40,13 @@ function setup() {
         foods.push(newFood);
     }
     }
+}
+
+/* eslint-disable-next-line no-unused-vars */
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  frameRate(30);
+  resetPopulation();
 
   red = color(255, 0, 0);
   green = color(0, 255, 0);
