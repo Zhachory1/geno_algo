@@ -109,7 +109,7 @@ function drawHud() {
   );
   const bestDNA = best ?
     `size ${best.dna.size.toFixed(1)}, move ${best.dna.move.toFixed(1)}, ` +
-      `dist ${best.dna.dist.toFixed(1)}` :
+      `dist ${best.dna.dist.toFixed(1)}, food ${best.dna.foodAttraction.toFixed(1)}` :
     'none';
 
   fill(255);
@@ -194,7 +194,10 @@ function draw() {
         // break;
       }
     }
-    let newForce = p5.Vector.mult(averageDir.normalize(), agents[i].dna.move/10);
+    let newForce = p5.Vector.mult(
+        averageDir.normalize(),
+        agents[i].dna.move * agents[i].dna.foodAttraction / 10,
+    );
     agents[i].applyForce(newForce);
 
     //Add friction
