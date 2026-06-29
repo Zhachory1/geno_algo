@@ -92,6 +92,26 @@ function queryWrapped(tree, loc, radius) {
   return results;
 }
 
+function drawHud() {
+  const best = agents.reduce(
+      (currentBest, agent) => !currentBest || agent.life > currentBest.life ?
+        agent : currentBest,
+      undefined,
+  );
+  const bestDNA = best ?
+    `size ${best.dna.size.toFixed(1)}, move ${best.dna.move.toFixed(1)}, ` +
+      `dist ${best.dna.dist.toFixed(1)}` :
+    'none';
+
+  fill(255);
+  noStroke();
+  textSize(14);
+  text(`Population: ${agents.length}`, 10, 20);
+  text(`Food: ${foods.length}`, 10, 40);
+  text(`Reproduced: ${reproduced}`, 10, 60);
+  text(`Best DNA by life: ${bestDNA}`, 10, 80);
+}
+
 /* eslint-disable-next-line no-unused-vars */
 function draw() {
   background(50);
@@ -196,6 +216,8 @@ function draw() {
       agents[i].drawDebug();
     }
   }
+
+  drawHud();
 
 //   noLoop()
 }
