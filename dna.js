@@ -1,9 +1,15 @@
 const mutation_rate = 0.1;
+const minSize = 10;
+const maxSize = 50;
+const minMove = 1;
+const maxMove = 100;
+const minDist = 50;
+const maxDist = 500;
 
 function DNA(
-    size = random(10, 50),
-    move = random(1, 100),
-    dist = random(50, 500),
+    size = random(minSize, maxSize),
+    move = random(minMove, maxMove),
+    dist = random(minDist, maxDist),
 ) {
   this.size = size;
   this.move = move;
@@ -25,7 +31,7 @@ function combine(dna1, dna2) {
 
   // size combine or mutate
   if (random() < mutation_rate) {
-    newSize = random(5, 50);
+    newSize = random(minSize, maxSize);
   } else {
     // average 1 and 2
     newSize = (dna1.size + dna2.size) / 2;
@@ -33,7 +39,7 @@ function combine(dna1, dna2) {
 
   // move combine or mutate
   if (random() < mutation_rate) {
-    newMove = random(1, 100);
+    newMove = random(minMove, maxMove);
   } else {
     // average 1 and 2
     newMove = (dna1.move + dna2.move) / 2;
@@ -41,7 +47,7 @@ function combine(dna1, dna2) {
 
   // dist combine or mutate
   if (random() < mutation_rate) {
-    newDist = random(50, 500);
+    newDist = random(minDist, maxDist);
   } else {
     // average 1 and 2
     newDist = (dna1.dist + dna2.dist) / 2;
