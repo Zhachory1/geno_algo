@@ -1,8 +1,7 @@
 let agentOptions = { 
   healing_rate: 20,
   poison_rate: 10,
-  hurt_rate: 0.2,
-  reproduce_thres: 500
+  hurt_rate: 0.2
 }
 
 function setUpAgentOptions(gui) {
@@ -10,7 +9,6 @@ function setUpAgentOptions(gui) {
   agent_options.add(agentOptions, "healing_rate", 0, 20, 0.5)
   agent_options.add(agentOptions, "poison_rate", 0, 20, 0.5)
   agent_options.add(agentOptions, "hurt_rate", 0, 1, 0.1)
-  agent_options.add(agentOptions, "reproduce_thres")
 }
 
 function Agent(x, y, dna) {
@@ -49,7 +47,7 @@ function Agent(x, y, dna) {
     }
     this.loc = new_loc;
 
-    if (!this.ready_to_reproduce && this.life >= agentOptions.reproduce_thres) {
+    if (!this.ready_to_reproduce && this.life >= this.dna.reproduceAge) {
       this.ready_to_reproduce = true;
     }
 
