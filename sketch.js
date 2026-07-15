@@ -6,6 +6,7 @@ let normalForce = 0.05;
 let red;
 let green;
 let gui;
+let pauseController;
 let options = {
   foodSpawn: 4,
   neighborFlee: 3,
@@ -20,12 +21,25 @@ function getRate(mult, reducer) {
   return mult / (reducer * reducer);
 }
 
+function setPause(pause) {
+  options.pause = pause;
+  if (pause) {
+    noLoop();
+  } else {
+    loop();
+  }
+  if (pauseController) {
+    pauseController.updateDisplay();
+  }
+}
+
 function setUpPopOptions(gui) {
   let popOptions = gui.addFolder("Population Options")
   popOptions.add(options, "foodSpawn", 0, 10, 0.5);
   popOptions.add(options, "neighborFlee", 0, 10, 0.5);
   popOptions.add(options, "debug");
-  popOptions.add(options, "pause");
+  pauseController = popOptions.add(options, "pause");
+  pauseController.onChange(setPause);
   popOptions.add(options, "resetPopulation");
 }
 
@@ -244,6 +258,6 @@ function mousePressed() {
 /* eslint-disable-next-line no-unused-vars */
 function keyPressed() {
   if (keyCode == ENTER) {
-    options.pause = !options.pause;
+    setPause(!options.pause);
   }
 }
