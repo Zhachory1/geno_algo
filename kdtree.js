@@ -44,25 +44,40 @@ const KDTree = function(node, botleft, toprght, func) {
         curr_node = new Node(
             this.func(new_x),
             split,
-            [new_x],
+            new_x,
             undefined,
             undefined,
         );
-        return;
+        return curr_node;
       }
       const x_point = this.func(new_x);
       const dim = x_point.length;
-      if (x_point.equals(curr_node.point)) {
-        // Duplicate, add to values.
-        cure_node.push(new_x);
-      } else if (x_point[split] < curr_node.point[split]) {
+      if (x_point[split] < curr_node.point[split]) {
         curr_node.left = insertImpl(new_x, curr_node.left, (split + 1) % dim);
       } else {
         curr_node.right = insertImpl(new_x, curr_node.right, (split + 1) % dim);
       }
       return curr_node;
-    };
+    }.bind(this);
     this.node = insertImpl(x, this.node, 0);
+  };
+
+  this.queryRange = function(minPoint, maxPoint) {
+    const results = [];
+    const query = function(currNode) {
+      if (!currNode) return;
+
+      if (inRange(currNode.point, minPoint, maxPoint)) {
+        results.push(currNode.value);
+      }
+
+      const split = currNode.split;
+      if (minPoint[split] <= currNode.point[split]) query(currNode.left);
+      if (maxPoint[split] >= currNode.point[split]) query(currNode.right);
+    };
+
+    query(this.node);
+    return results;
   };
 };
 
@@ -79,28 +94,17 @@ function kdFromList(list, botleft, toprght, func) {
     }
 
     // Else, sort the set by split dimension
-    const sorted = sublist.sort(compareWithParam(func, split));
-    let m = floor(sorted.length / 2); // Median index
+    const sorted = sublist.slice().sort(compareWithParam(func, split));
+    const m = floor(sorted.length / 2); // Median index
     const d = sorted[m]; // Median value
-    const values = [];
-    values.push(d);
-    // gather all the same points with that value in this dimension
-    const n = 0;
-    while (
-      m + n + 1 < sorted.length &&
-      func(sorted[m + n + 1])[split] == func(d)[split]
-    ) {
-      values.push(sorted[m + n + 1]);
-      m++;
-    }
     const nextSplit = (split + 1) % func(d).length;
 
     return new Node(
         func(d),
         split,
         d,
-        makeKd(sublist.slice(0, m), nextSplit, func),
-        makeKd(sublist.slice(m + n + 1, sublist.length), nextSplit, func),
+        makeKd(sorted.slice(0, m), nextSplit, func),
+        makeKd(sorted.slice(m + 1, sorted.length), nextSplit, func),
     );
   };
   return new KDTree(makeKd(list, 0, func), botleft, toprght, func);
@@ -110,4 +114,11 @@ function compareWithParam(func, split) {
   return function(obj1, obj2) {
     return func(obj1)[split] - func(obj2)[split];
   };
+}
+
+function inRange(point, minPoint, maxPoint) {
+  for (let i = 0; i < point.length; i++) {
+    if (point[i] < minPoint[i] || point[i] > maxPoint[i]) return false;
+  }
+  return true;
 }
